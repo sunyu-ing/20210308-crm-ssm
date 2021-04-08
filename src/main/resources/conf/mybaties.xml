@@ -22,7 +22,8 @@
 
     <!--sql mapper(sql映射文件的位置)-->
     <mappers>
-        <package name="com.sunyu.crm.workbench.web.controller"/>
+        <package name="com.sunyu.crm.settings.dao"/>
+        <package name="com.sunyu.crm.workbench.dao"/>
     </mappers>
 
 </configuration>

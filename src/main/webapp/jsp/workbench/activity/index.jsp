@@ -21,13 +21,91 @@
 
 	$(function(){
 		
-		
+		pageList(1,5);
 		
 	});
+
+	function pageList(pageNo,pageSize){
+
+		//刷新前先将删除记录的复选框全部清零
+		$("#qx").prop("checked",false);
+
+		//将隐藏域的内容取出来，查询结束后重新复制到搜索框
+		$("#search-name").val( $.trim($("#hidden-name").val()) );
+		$("#search-owner").val( $.trim($("#hidden-owner").val()) );
+		$("#search-startDate").val( $.trim($("#hidden-startDate").val()) );
+		$("#search-endDate").val( $.trim($("#hidden-endDate").val()) );
+
+		$.ajax({
+
+			url:"jsp/workbench/activity/pageList.do",
+			data:{
+
+				"pageNo":pageNo,
+				"pageSize":pageSize,
+				"name":$.trim( $("#search-name").val() ),
+				"owner":$.trim( $("#search-owner").val() ),
+				"startDate":$.trim( $("#search-startDate").val() ),
+				"endDate":$.trim( $("#search-endDate").val() ),
+
+			},
+			type:"get",
+			dataType:"json",
+
+			success:function (data) {
+
+				var html = "";
+
+				$.each(data.dataList,function (i,n) {
+
+					html += '<tr class="active">';
+					html += '<td><input type="checkbox" name="qx" id="'+n.id+'" /></td>';
+					html += '<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href=\'jsp/workbench/activity/detail.jsp?id='+n.id+'\';">'+n.name+'</a></td>';
+					html += '<td>'+n.owner+'</td>';
+					html += '<td>'+n.startDate+'</td>';
+					html += '<td>'+n.endDate+'</td>';
+					html += '</tr>';
+
+				})
+
+				$("#activityBody").html(html);
+
+				//数据处理完毕后，结合分页插件，对前端展现分页相关的信息
+				$("#activityPage").bs_pagination({
+					currentPage: pageNo, // 页码
+					rowsPerPage: pageSize, // 每页显示的记录条数
+					maxRowsPerPage: 20, // 每页最多显示的记录条数
+					totalPages: totalPages, // 总页数
+					totalRows: data.total, // 总记录条数
+
+					visiblePageLinks: 3, // 显示几个卡片
+
+					showGoToPage: true,
+					showRowsPerPage: true,
+					showRowsInfo: true,
+					showRowsDefaultInfo: true,
+
+					//该回调函数是在点击分页组件的时候触发的
+					onChangePage : function(event, data){
+						pageList(data.currentPage , data.rowsPerPage);
+					}
+				});
+
+			}
+
+		})
+
+	}
 	
 </script>
 </head>
 <body>
+
+	<input type="hidden" id="hidden-name" />
+	<input type="hidden" id="hidden-owner" />
+	<input type="hidden" id="hidden-startDate" />
+	<input type="hidden" id="hidden-endDate" />
+
 
 	<!-- 创建市场活动的模态窗口 -->
 	<div class="modal fade" id="createActivityModal" role="dialog">
@@ -177,14 +255,14 @@
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">名称</div>
-				      <input class="form-control" type="text">
+				      <input class="form-control" type="text" id="search-name">
 				    </div>
 				  </div>
 				  
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">所有者</div>
-				      <input class="form-control" type="text">
+				      <input class="form-control" type="text" id="search-owner">
 				    </div>
 				  </div>
 
@@ -192,13 +270,13 @@
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">开始日期</div>
-					  <input class="form-control" type="text" id="startTime" />
+					  <input class="form-control" type="text" id="search-startDate" />
 				    </div>
 				  </div>
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">结束日期</div>
-					  <input class="form-control" type="text" id="endTime">
+					  <input class="form-control" type="text" id="search-endDate">
 				    </div>
 				  </div>
 				  
@@ -218,15 +296,15 @@
 				<table class="table table-hover">
 					<thead>
 						<tr style="color: #B3B3B3;">
-							<td><input type="checkbox" /></td>
+							<td><input type="checkbox" id="qx" /></td>
 							<td>名称</td>
                             <td>所有者</td>
 							<td>开始日期</td>
 							<td>结束日期</td>
 						</tr>
 					</thead>
-					<tbody>
-						<tr class="active">
+					<tbody id="activityBody">
+						<%--<tr class="active">
 							<td><input type="checkbox" /></td>
 							<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='jsp/workbench/activity/detail.jsp';">发传单</a></td>
                             <td>zhangsan</td>
@@ -239,7 +317,7 @@
                             <td>zhangsan</td>
                             <td>2020-10-10</td>
                             <td>2020-10-20</td>
-                        </tr>
+                        </tr>--%>
 					</tbody>
 				</table>
 			</div>
